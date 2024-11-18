@@ -16,8 +16,8 @@ def index():
     if request.method == 'POST':
         url = request.form['url']
         query = request.form['query']
-        max_depth = int(request.form.get('max_depth', 2))  # Ограничение глубины
-        max_pages = int(request.form.get('max_pages', 50))  # Ограничение количества страниц
+        max_depth = int(request.form.get('max_depth', 10000))  # Ограничение глубины
+        max_pages = int(request.form.get('max_pages', 10000))  # Ограничение количества страниц
 
         # Проверяем кэш
         cache_file = os.path.join(CACHE_DIR, f"{url.replace('https://', '').replace('http://', '').replace('/', '_')}.txt")
