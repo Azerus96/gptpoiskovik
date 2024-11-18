@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поиск по сайту</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Поиск по сайту</h1>
+        <form method="POST">
+            <label for="url">Введите URL сайта:</label><br>
+            <input type="text" id="url" name="url" required><br><br>
+            <label for="query">Введите поисковую фразу:</label><br>
+            <input type="text" id="query" name="query" required><br><br>
+            <label for="max_depth">Максимальная глубина поиска (по умолчанию 2):</label><br>
+            <input type="number" id="max_depth" name="max_depth" value="2"><br><br>
+            <label for="max_pages">Максимальное количество страниц (по умолчанию 50):</label><br>
+            <input type="number" id="max_pages" name="max_pages" value="50"><br><br>
+            <input type="submit" value="Искать">
+        </form>
+    </div>
+</body>
+</html>
