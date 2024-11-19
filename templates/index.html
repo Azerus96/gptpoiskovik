@@ -15,11 +15,27 @@
             <label for="query">Введите поисковую фразу:</label><br>
             <input type="text" id="query" name="query" required><br><br>
             <label for="max_depth">Максимальная глубина поиска (по умолчанию 2):</label><br>
-            <input type="number" id="max_depth" name="max_depth" value="2"><br><br>
+            <input type="number" id="max_depth" name="max_depth" value="2" min="1"><br><br>
             <label for="max_pages">Максимальное количество страниц (по умолчанию 50):</label><br>
-            <input type="number" id="max_pages" name="max_pages" value="50"><br><br>
+            <input type="number" id="max_pages" name="max_pages" value="50" min="1"><br><br>
             <input type="submit" value="Искать">
         </form>
+
+        {% if results %}
+            <h2>Результаты поиска:</h2>
+            <ul>
+            {% for result in results %}
+                <li>
+                    <p>{{ result.context }}...</p>
+                    <p><strong>{{ result.title }}</strong></p>
+                    <p><a href="{{ result.url }}">{{ result.url }}</a></p>
+                    <p>Вхождений на странице: {{ result.count }} раз</p>
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>Результаты не найдены.</p>
+        {% endif %}
     </div>
 </body>
 </html>
