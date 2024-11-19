@@ -1,41 +1,60 @@
-import requests
+import asyncio
+import aiohttp
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
-import time
+import json
 
-# Функция для скрапинга сайта с рекурсивным обходом ссылок
-def scrape_site(url, max_depth=2, max_pages=50):
-    visited = set()  # Множество для хранения посещённых страниц
-    pages_text = []  # Список для хранения текста со всех страниц
+max_depth = 2
+max_pages = 50
 
-    def scrape_page(current_url, depth):
-        if depth > max_depth or len(visited) >= max_pages:
-            return
+async def fetch(session, url):
+    try:
+        async with session.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=10) as response:
+            response.raise_for_status()  # Проверка на успешный статус ответа
+            return await response.text()
+    except Exception as e:
+        print(f"Ошибка при запросе {url}: {e}")
+        return ""
 
-        try:
-            response = requests.get(current_url)
-            if response.status_code == 200:
-                visited.add(current_url)
-                soup = BeautifulSoup(response.text, 'html.parser')
+async def scrape_page(session, current_url, depth, visited, pages_data):
+    if depth > max_depth or len(visited) >= max_pages:
+        return
 
-                # Извлекаем текст со страницы
-                page_text = soup.get_text(separator=' ', strip=True)
-                pages_text.append(page_text)
+    visited.add(current_url)
+    html = await fetch(session, current_url)
 
-                # Находим все ссылки на странице
-                for link in soup.find_all('a', href=True):
-                    absolute_url = urljoin(current_url, link['href'])
-                    # Проверяем, что ссылка ведёт на тот же домен
-                    if urlparse(absolute_url).netloc == urlparse(url).netloc and absolute_url not in visited:
-                        scrape_page(absolute_url, depth + 1)
+    if html:
+        soup = BeautifulSoup(html, 'html.parser')
+        page_text = soup.get_text(separator=' ', strip=True)
+        page_title = soup.title.string if soup.title else current_url
 
-                # Задержка между запросами, чтобы не перегружать сайт
-                time.sleep(1)
-        except Exception as e:
-            print(f"Ошибка при скрапинге {current_url}: {e}")
+        pages_data.append({
+            'url': current_url,
+            'title': page_title,
+            'content': page_text
+        })
 
-    # Начинаем скрапинг с главной страницы
-    scrape_page(url, 0)
+        for link in soup.find_all('a', href=True):
+            absolute_url = urljoin(current_url, link['href'])
+            if urlparse(absolute_url).netloc == urlparse(current_url).netloc and absolute_url not in visited:
+                await scrape_page(session, absolute_url, depth + 1, visited, pages_data)
+                await asyncio.sleep(1)  # Задержка между запросами
 
-    # Возвращаем весь текст, собранный со всех страниц
-    return ' '.join(pages_text)
+async def scrape_site(url, max_depth=2, max_pages=50):
+    visited = set()
+    pages_data = []
+    
+    async with aiohttp.ClientSession() as session:
+        await scrape_page(session, url, 0, visited, pages_data)
+    
+    return pages_data  # Возврат всех собранных страниц для использования
+
+def main(url):
+    loop = asyncio.get_event_loop()
+    pages = loop.run_until_complete(scrape_site(url, max_depth, max_pages))
+    with open('data.json', 'w', encoding='utf-8') as f:
+        json.dump(pages, f, ensure_ascii=False, indent=4)
+
+if __name__ == "__main__":
+    # Пример запуска
+    main('https://example.com')  # Замените на нужный URL
