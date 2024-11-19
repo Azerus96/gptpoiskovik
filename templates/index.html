@@ -34,7 +34,9 @@
             {% endfor %}
             </ul>
         {% else %}
-            <p>Результаты не найдены.</p>
+            {% if no_results_message %}
+                <p>{{ no_results_message }}</p>  <!-- Показ сообщения, если результаты не найдены -->
+            {% endif %}
         {% endif %}
     </div>
 </body>
