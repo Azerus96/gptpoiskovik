@@ -3,6 +3,7 @@ import os
 import json
 import asyncio
 import aiohttp
+from bs4 import BeautifulSoup  # Добавлено для импорта BeautifulSoup
 
 app = Flask(__name__)
 
@@ -39,10 +40,10 @@ async def scrape_site(url):
         html = await fetch(session, current_url)
 
         if html:
-            soup = BeautifulSoup(html, 'html.parser')
+            soup = BeautifulSoup(html, 'html.parser')  # Убедитесь, что BeautifulSoup импортирован
             page_title = soup.title.string if soup.title else current_url
             page_text = soup.get_text(separator=' ', strip=True)
-            
+
             pages_data.append({
                 'url': current_url,
                 'title': page_title,
