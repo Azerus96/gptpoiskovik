@@ -3,7 +3,8 @@ import os
 import json
 import asyncio
 import aiohttp
-from bs4 import BeautifulSoup  # Добавлено для импорта BeautifulSoup
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin, urlparse  # Импортируем необходимые функции
 
 app = Flask(__name__)
 
@@ -40,7 +41,7 @@ async def scrape_site(url):
         html = await fetch(session, current_url)
 
         if html:
-            soup = BeautifulSoup(html, 'html.parser')  # Убедитесь, что BeautifulSoup импортирован
+            soup = BeautifulSoup(html, 'html.parser')
             page_title = soup.title.string if soup.title else current_url
             page_text = soup.get_text(separator=' ', strip=True)
 
@@ -51,7 +52,7 @@ async def scrape_site(url):
             })
 
             for link in soup.find_all('a', href=True):
-                absolute_url = urljoin(current_url, link['href'])
+                absolute_url = urljoin(current_url, link['href'])  # Здесь используется urljoin
                 if urlparse(absolute_url).netloc == urlparse(url).netloc and absolute_url not in visited:
                     await scrape_page(session, absolute_url, depth + 1)
                     await asyncio.sleep(1)  # Задержка между запросами
@@ -64,6 +65,7 @@ async def scrape_site(url):
 @app.route('/', methods=['GET', 'POST'])
 def index():
     results = []
+    no_results_message = ""  # Переменная для сообщения о результатах поиска
     if request.method == 'POST':
         url = request.form['url']
         query = request.form['query']
@@ -90,7 +92,10 @@ def index():
         # Сортировка результатов по частоте вхождения
         results.sort(key=lambda x: x['count'], reverse=True)
 
-    return render_template('index.html', results=results)
+        if not results:  # Проверяем, если результаты пусты
+            no_results_message = "Результаты не найдены."  # Устанавливаем сообщение только если результатов нет
+
+    return render_template('index.html', results=results, no_results_message=no_results_message)
 
 def extract_context(text, query):
     start = text.lower().find(query.lower())
