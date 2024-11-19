@@ -18,6 +18,11 @@ h1 {
     font-size: 24px;
 }
 
+h2 {
+    margin-top: 30px;
+    font-size: 20px;
+}
+
 form {
     display: flex;
     flex-direction: column;
@@ -46,4 +51,31 @@ input[type="submit"] {
 
 input[type="submit"]:hover {
     background-color: #0056b3;
+}
+
+ul {
+    list-style-type: none; /* Удаляем маркеры списка */
+    padding: 0;
+}
+
+li {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    background-color: #f9f9f9; /* Светлый фон для элементов списка */
+}
+
+strong {
+    color: #007bff; /* Цвет для заголовка результата */
+}
+
+p {
+    margin-bottom: 10px; /* Отступы для абзацев */
+}
+
+@media (max-width: 600px) {
+    .container {
+        width: 90%; /* Адаптивная ширина для мобильных устройств */
+    }
 }
